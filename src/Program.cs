@@ -7,9 +7,7 @@ namespace http_client
 	{
 		static void Main(string[] args)
 		{
-			// var res = HttpRequest.MakeHttpRequest("www.google.com", "/", HttpMethod.GET, null);
-			var res = HttpRequest.MakeHttpRequest("jsonplaceholder.typicode.com", "/posts", HttpMethod.GET, null);
-			Console.WriteLine(res);
+			HttpClientRunner.Run();
 
 			Console.WriteLine("\nPress enter to exit...");
 			Console.Read();

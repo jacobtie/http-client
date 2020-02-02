@@ -10,6 +10,7 @@ namespace http_client.http
 	{
 		private const int HTTP_PORT = 80;
 		private const int RESPONSE_BUFFER_SIZE = 512;
+		private const string FAILED_MESSAGE = "Connection failed";
 		private string _host;
 		private string _route;
 		private HttpMethod _method;
@@ -36,7 +37,7 @@ namespace http_client.http
 			{
 				if (socket is null)
 				{
-					msg = "Connection failed";
+					msg = FAILED_MESSAGE;
 				}
 				else
 				{
@@ -128,10 +129,10 @@ namespace http_client.http
 
 			do
 			{
-				bytes = socket.Receive(responseBuffer, RESPONSE_BUFFER_SIZE, 0);
+				bytes = socket.Receive(responseBuffer, RESPONSE_BUFFER_SIZE, SocketFlags.None);
 				bytesReceived.AddRange(responseBuffer.Take(bytes));
 			}
-			while (bytes == RESPONSE_BUFFER_SIZE);
+			while (socket.Available > 0);
 
 			return Encoding.ASCII.GetString(bytesReceived.ToArray());
 		}
