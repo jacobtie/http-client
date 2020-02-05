@@ -9,6 +9,7 @@ namespace http_client
 		private string _route;
 		private HttpMethod _method;
 		private string? _body;
+		private string? _contentType;
 
 		public static void Run()
 		{
@@ -21,6 +22,7 @@ namespace http_client
 			this._route = "";
 			this._method = HttpMethod.GET;
 			this._body = null;
+			this._contentType = null;
 
 			bool playNextRound;
 			do
@@ -45,6 +47,7 @@ namespace http_client
 			_method = _getMethodInput();
 			if (_method == HttpMethod.PUT)
 			{
+				_contentType = _getContentTypeInput();
 				_body = _getBodyInput();
 			}
 			else
@@ -99,9 +102,15 @@ namespace http_client
 			return Console.ReadLine();
 		}
 
+		private string _getContentTypeInput()
+		{
+			Console.Write("Enter Content Type (ex. application/json or text/plain): ");
+			return Console.ReadLine();
+		}
+
 		private string _doRequest()
 		{
-			var response = HttpRequest.MakeHttpRequest(_host, _route, _method, _body);
+			var response = HttpRequest.MakeHttpRequest(_host, _route, _method, _body, _contentType);
 			return response;
 		}
 

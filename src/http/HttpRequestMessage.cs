@@ -9,7 +9,7 @@ namespace http_client.http
 		public HttpMethod Method { get; set; }
 		public string Route { get; set; }
 		public string Version { get; set; }
-		public Dictionary<string, string> Headers { get; set; }
+		public Dictionary<string, object> Headers { get; set; }
 		public string? Body { get; set; }
 
 		public HttpRequestMessage(HttpMethod method, string host, string route, string? body)
@@ -18,7 +18,7 @@ namespace http_client.http
 			this.Route = route;
 			this.Version = "HTTP/1.1";
 			this.Body = body;
-			this.Headers = new Dictionary<string, string>();
+			this.Headers = new Dictionary<string, object>();
 			_initDefaultHeaders(host);
 		}
 
@@ -31,7 +31,7 @@ namespace http_client.http
 			this.SetHeaderValue("Connection", "keep-alive");
 		}
 
-		public void SetHeaderValue(string header, string value)
+		public void SetHeaderValue(string header, object value)
 		{
 			if (this.Headers.ContainsKey(header))
 			{
@@ -43,7 +43,7 @@ namespace http_client.http
 			}
 		}
 
-		public string GetHeaderValue(string header)
+		public object GetHeaderValue(string header)
 		{
 			if (this.Headers.ContainsKey(header))
 			{

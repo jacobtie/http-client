@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -15,18 +16,20 @@ namespace http_client.http
 		private string _route;
 		private HttpMethod _method;
 		private string? _body;
+		private string? _contentType;
 
-		public static string MakeHttpRequest(string host, string route, HttpMethod method, string? body)
+		public static string MakeHttpRequest(string host, string route, HttpMethod method, string? body, string? contentType)
 		{
-			return new HttpRequest(host, route, method, body)._makeRequest();
+			return new HttpRequest(host, route, method, body, contentType)._makeRequest();
 		}
 
-		private HttpRequest(string host, string route, HttpMethod method, string? body)
+		private HttpRequest(string host, string route, HttpMethod method, string? body, string? contentType)
 		{
 			this._host = host;
 			this._route = route;
 			this._method = method;
 			this._body = body;
+			this._contentType = contentType;
 		}
 
 		private string _makeRequest()
@@ -117,8 +120,16 @@ namespace http_client.http
 
 		private byte[] _buildMessage()
 		{
-			var requestMessage = new HttpRequestMessage(_method, _host, _route, _body).AsString();
-			return Encoding.ASCII.GetBytes(requestMessage);
+			var requestMessage = new HttpRequestMessage(_method, _host, _route, _body);
+			if (!(_contentType is null))
+			{
+				requestMessage.SetHeaderValue("Content-Type", _contentType);
+				if (!(_body is null))
+				{
+					requestMessage.SetHeaderValue("Content-Length", Encoding.ASCII.GetByteCount(_body));
+				}
+			}
+			return Encoding.ASCII.GetBytes(requestMessage.AsString());
 		}
 
 		private string _receiveFromSocket(Socket socket)
@@ -131,8 +142,9 @@ namespace http_client.http
 			{
 				bytes = socket.Receive(responseBuffer, RESPONSE_BUFFER_SIZE, SocketFlags.None);
 				bytesReceived.AddRange(responseBuffer.Take(bytes));
+				Thread.Sleep(2);
 			}
-			while (socket.Available > 0);
+			while (socket.Available > 0 && bytes > 0);
 
 			return Encoding.ASCII.GetString(bytesReceived.ToArray());
 		}
