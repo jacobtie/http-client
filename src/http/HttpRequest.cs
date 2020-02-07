@@ -126,7 +126,7 @@ namespace http_client.http
 				requestMessage.SetHeaderValue("Content-Type", _contentType);
 				if (!(_body is null))
 				{
-					requestMessage.SetHeaderValue("Content-Length", Encoding.ASCII.GetByteCount(_body));
+					requestMessage.SetHeaderValue("Content-Length", Encoding.ASCII.GetByteCount(_body).ToString());
 				}
 			}
 			return Encoding.ASCII.GetBytes(requestMessage.AsString());
