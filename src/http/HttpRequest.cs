@@ -90,32 +90,17 @@ namespace http_client.http
 		private Socket? _getIPV4Socket(IPAddress[] addresses)
 		{
 			Socket? socket = null;
-			foreach (var address in addresses)
+
+			IPAddress? ipv4Address = addresses.FirstOrDefault(
+				address => address.AddressFamily == AddressFamily.InterNetwork);
+
+			if (ipv4Address != null)
 			{
-				var attemptedSocket = _trySocket(address);
-				if (!(attemptedSocket is null))
-				{
-					socket = attemptedSocket;
-					break;
-				}
+				socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+				socket.Connect(ipv4Address, _port);
 			}
 
 			return socket;
-		}
-
-		private Socket? _trySocket(IPAddress address)
-		{
-			var attemptedSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			try
-			{
-				attemptedSocket.Connect(address, _port);
-			}
-			catch
-			{
-				return null;
-			}
-
-			return attemptedSocket.Connected ? attemptedSocket : null;
 		}
 
 		private string _sendRequest(Socket socket)
