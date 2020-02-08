@@ -6,6 +6,7 @@ namespace http_client
 	public class HttpClientRunner
 	{
 		private string _host;
+		private int _port;
 		private string _route;
 		private HttpMethod _method;
 		private string? _body;
@@ -19,6 +20,7 @@ namespace http_client
 		private HttpClientRunner()
 		{
 			this._host = "";
+			this._port = -1;
 			this._route = "";
 			this._method = HttpMethod.GET;
 			this._body = null;
@@ -34,15 +36,23 @@ namespace http_client
 
 		private bool _playRound()
 		{
-			_getInput();
-			var response = _doRequest();
-			Console.WriteLine($"\n{response}\n");
+			try
+			{
+				_getInput();
+				var response = _doRequest();
+				Console.WriteLine($"\n{response}\n");
+			}
+			catch
+			{
+				Console.WriteLine("An error occurred");
+			}
 			return _askPlayNextRound();
 		}
 
 		private void _getInput()
 		{
 			_host = _getHostInput();
+			_port = _getPortInput();
 			_route = _getRouteInput();
 			_method = _getMethodInput();
 			if (_method == HttpMethod.PUT)
@@ -62,6 +72,24 @@ namespace http_client
 			return Console.ReadLine();
 		}
 
+		private int _getPortInput()
+		{
+			int port = 0;
+
+			do
+			{
+				Console.Write("Enter port number (ex. 80, 5000, etc): ");
+				string portAsString = Console.ReadLine();
+				if (!Int32.TryParse(portAsString, out port) || port <= 0)
+				{
+					Console.WriteLine("Invalid port number");
+				}
+			}
+			while (port <= 0);
+
+			return port;
+		}
+
 		private string _getRouteInput()
 		{
 			Console.Write("Enter route (starting with '/'): ");
@@ -70,30 +98,30 @@ namespace http_client
 
 		private HttpMethod _getMethodInput()
 		{
-			string methodRaw;
+			HttpMethod? method = null;
 			do
 			{
+				string methodRaw;
+
 				Console.Write("Enter HTTP Method (Either GET or PUT): ");
 				methodRaw = Console.ReadLine();
-			}
-			while (!methodRaw.Equals("GET", StringComparison.InvariantCultureIgnoreCase)
-				&& !methodRaw.Equals("PUT", StringComparison.InvariantCultureIgnoreCase));
 
-			HttpMethod method;
-			if (methodRaw.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
-			{
-				method = HttpMethod.GET;
+				if (methodRaw.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
+				{
+					method = HttpMethod.GET;
+				}
+				else if (methodRaw.Equals("PUT", StringComparison.InvariantCultureIgnoreCase))
+				{
+					method = HttpMethod.PUT;
+				}
+				else
+				{
+					Console.WriteLine("Invalid HTTP method");
+				}
 			}
-			else if (methodRaw.Equals("PUT", StringComparison.InvariantCultureIgnoreCase))
-			{
-				method = HttpMethod.PUT;
-			}
-			else
-			{
-				throw new Exception("HTTP Method not defined");
-			}
+			while (method == null);
 
-			return method;
+			return (HttpMethod)method;
 		}
 
 		private string _getBodyInput()
@@ -110,7 +138,7 @@ namespace http_client
 
 		private string _doRequest()
 		{
-			var response = HttpRequest.MakeHttpRequest(_host, _route, _method, _body, _contentType);
+			var response = HttpRequest.MakeHttpRequest(_host, _port, _route, _method, _body, _contentType);
 			return response;
 		}
 

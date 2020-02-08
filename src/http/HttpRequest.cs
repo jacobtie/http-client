@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,23 +10,24 @@ namespace http_client.http
 {
 	public class HttpRequest
 	{
-		private const int HTTP_PORT = 80;
 		private const int RESPONSE_BUFFER_SIZE = 512;
 		private const string FAILED_MESSAGE = "Connection failed";
 		private string _host;
+		private int _port;
 		private string _route;
 		private HttpMethod _method;
 		private string? _body;
 		private string? _contentType;
 
-		public static string MakeHttpRequest(string host, string route, HttpMethod method, string? body, string? contentType)
+		public static string MakeHttpRequest(string host, int port, string route, HttpMethod method, string? body, string? contentType)
 		{
-			return new HttpRequest(host, route, method, body, contentType)._makeRequest();
+			return new HttpRequest(host, port, route, method, body, contentType)._makeRequest();
 		}
 
-		private HttpRequest(string host, string route, HttpMethod method, string? body, string? contentType)
+		private HttpRequest(string host, int port, string route, HttpMethod method, string? body, string? contentType)
 		{
 			this._host = host;
+			this._port = port;
 			this._route = route;
 			this._method = method;
 			this._body = body;
@@ -34,21 +36,28 @@ namespace http_client.http
 
 		private string _makeRequest()
 		{
-			string msg;
-
-			using (var socket = _initSocket())
+			try
 			{
-				if (socket is null)
-				{
-					msg = FAILED_MESSAGE;
-				}
-				else
-				{
-					msg = _sendRequest(socket);
-				}
-			}
+				string msg;
 
-			return msg;
+				using (var socket = _initSocket())
+				{
+					if (socket is null)
+					{
+						msg = FAILED_MESSAGE;
+					}
+					else
+					{
+						msg = _sendRequest(socket);
+					}
+				}
+
+				return msg;
+			}
+			catch
+			{
+				throw new Exception("An error occurred");
+			}
 		}
 
 		private Socket? _initSocket()
@@ -99,7 +108,7 @@ namespace http_client.http
 			var attemptedSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			try
 			{
-				attemptedSocket.Connect(address, HTTP_PORT);
+				attemptedSocket.Connect(address, _port);
 			}
 			catch
 			{
