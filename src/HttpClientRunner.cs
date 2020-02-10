@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using http_client.http;
 
 namespace http_client
@@ -11,6 +12,50 @@ namespace http_client
 		private HttpMethod _method;
 		private string? _body;
 		private string? _contentType;
+
+		public static void Run(string host, int port, string filename, string command)
+		{
+			new HttpClientRunner(host, port, filename, command);
+		}
+
+		private HttpClientRunner(string host, int port, string filename, string command)
+		{
+			this._host = host;
+			this._port = port;
+			this._route = filename[0] == '/' ? filename : $"/{filename}";
+			HttpMethod method;
+			if (command.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
+			{
+				method = HttpMethod.GET;
+			}
+			else if (command.Equals("PUT", StringComparison.InvariantCultureIgnoreCase))
+			{
+				method = HttpMethod.PUT;
+			}
+			else
+			{
+				throw new ArgumentException("Invalid HTTP method");
+			}
+
+			this._method = method;
+
+			if (method == HttpMethod.PUT)
+			{
+				this._body = _readFile(filename);
+			}
+
+			var response = _doRequest();
+
+			Console.WriteLine(response);
+		}
+
+		private string _readFile(string filename)
+		{
+			var fileLines = File.ReadAllLines($"files/{filename}");
+			var contents = string.Join("\n", fileLines);
+
+			return contents;
+		}
 
 		public static void Run()
 		{
