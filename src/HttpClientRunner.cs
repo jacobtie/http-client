@@ -24,44 +24,64 @@ namespace http_client
 		// Constructor to create the HTTP Client and wait for responses
 		private HttpClientRunner(string host, int port, string filename, string command)
 		{
-			// Setting of the fields of the HTTP Client
-			this._host = host;
-			this._port = port;
-			this._route = filename[0] == '/' ? filename : $"/{filename}";
-			
-			// Retrieve the type of method based on the provided command
-			HttpMethod method;
-			if (command.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
-			{
-				method = HttpMethod.GET;
-			}
-			else if (command.Equals("PUT", StringComparison.InvariantCultureIgnoreCase))
-			{
-				method = HttpMethod.PUT;
-			}
-			else
-			{
-				throw new ArgumentException("Invalid HTTP method");
-			}
+			this._host = "";
+			this._port = 0;
+			this._route = "";
+			this._method = 0;
 
-			this._method = method;
-
-			// If this command is a PUT command
-			if (method == HttpMethod.PUT)
+			try
 			{
-				// Read the provided file
-				this._body = _readFile(filename);
-			}
+				// Setting of the fields of the HTTP Client
+				this._host = host;
+				this._port = port;
+				this._route = filename[0] == '/' ? filename : $"/{filename}";
 
-			// Receive and print the response
-			var response = _doRequest();
-			Console.WriteLine(response);
+				// Retrieve the type of method based on the provided command
+				HttpMethod method;
+				if (command.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
+				{
+					method = HttpMethod.GET;
+				}
+				else if (command.Equals("PUT", StringComparison.InvariantCultureIgnoreCase))
+				{
+					method = HttpMethod.PUT;
+				}
+				else
+				{
+					throw new ArgumentException("Invalid HTTP method");
+				}
+
+				this._method = method;
+
+				// If this command is a PUT command
+				if (method == HttpMethod.PUT)
+				{
+					// Read the provided file
+					this._body = _readFile(filename);
+				}
+
+				// Receive and print the response
+				var response = _doRequest();
+				Console.WriteLine(response);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+			}
 		}
 
 		// Method to read the contents of the file
 		private string _readFile(string filename)
 		{
-			var contents = File.ReadAllText($"files/{filename}");
+			string contents;
+			try
+			{
+				contents = File.ReadAllText($"files/{filename}");
+			}
+			catch
+			{
+				throw new Exception("File does not exist in files/ directory");
+			}
 			return contents;
 		}
 

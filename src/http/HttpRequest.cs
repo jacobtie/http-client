@@ -61,7 +61,7 @@ namespace http_client.http
 			}
 			catch
 			{
-				throw new Exception("An error occurred");
+				throw new Exception("A connection error occurred");
 			}
 		}
 
@@ -139,7 +139,7 @@ namespace http_client.http
 		{
 			// Create a new request message with the provided fields
 			var requestMessage = new HttpRequestMessage(_method, _host, _route, _body);
-			
+
 			// If there is supposed to be content
 			if (!(_contentType is null))
 			{
@@ -170,7 +170,7 @@ namespace http_client.http
 			{
 				// Get the number of bytes to take from the socket
 				bytes = socket.Receive(responseBuffer, RESPONSE_BUFFER_SIZE, SocketFlags.None);
-				
+
 				// Get the bytes from the socket
 				bytesReceived.AddRange(responseBuffer.Take(bytes));
 
