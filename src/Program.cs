@@ -8,11 +8,7 @@ namespace http_client
 		static void Main(string[] args)
 		{
 			// If the 4 arguments were not given
-			if (args.Length != 4)
-			{
-				Console.WriteLine("Incorrect number of arguments");
-			}
-			else
+			if (args.Length == 4)
 			{
 				// Try to store the port from the second argument
 				int port;
@@ -30,6 +26,14 @@ namespace http_client
 				{
 					Console.WriteLine("Port is not valid");
 				}
+			}
+			else if (args.Length == 0)
+			{
+				HttpClientRunner.Run();
+			}
+			else
+			{
+				Console.WriteLine("Incorrect number of arguments");
 			}
 		}
 	}
